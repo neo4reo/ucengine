@@ -192,12 +192,18 @@
                     getFileUploadUrl: function() {
                         return "/api/"+ VERSION +"/file/"+meetingname+"?uid="+presence.uid+"&sid="+presence.sid;
                     },
+                    getFileAlternativeUploadUrl: function() {
+                        return "/api/"+ VERSION +"/file/"+meetingname+"/"+presence.uid+"/"+presence.sid;
+                    },
                     /**
                      * Get file download url
                      * @param String filename
                      */
                     getFileDownloadUrl: function(filename) {
                         return "/api/"+ VERSION +"/file/"+meetingname+"/"+ filename +"?uid="+presence.uid+"&sid="+presence.sid;
+                    },
+                    getFileAlternativeDownloadUrl: function(filename) {
+                        return "/api/"+ VERSION +"/file/"+meetingname+"/"+ filename +"/"+presence.uid+"/"+presence.sid;
                     },
                     /**
                      * @param Object params

@@ -226,8 +226,19 @@ $.uce.widget("fileupload", {
         $(this._listFiles).each(
             function(index, file) {
                 var id = file.metadata.id;
-                var mime = (file.metadata.mime == "application/pdf") ? "pdf" : 
-                           (file.metadata.mime == "image/gif" || file.metadata.mime == "image/png" || file.metadata.mime == "image/jpeg") ? "image" : "default";
+                var mimes = { 'application/pdf'     : 'pdf'
+                        , 'image/gif'           : 'image'
+                        , 'image/png'           : 'image'
+                        , 'image/jpeg'          : 'image'
+                        , 'video/mpeg'          : 'video'
+                        , 'video/mp4'           : 'video'
+                        , 'video/ogg'           : 'video'
+                        //, 'video/x-flv'         : 'video'
+                        //, 'video/quicktime'     : 'video'
+                        //, 'video/x-ms-wmv'      : 'video'
+                        //, 'video/x-ms-msvideo'  : 'video'
+                        };
+                var mime = (file.metadata.mime in mimes) ? mimes[file.metadata.mime] : 'default';
                 var filename = $('<a>').text(file.metadata.name)
                                        .attr('href', '#')
                                        .attr('class', 'ui-fileupload ui-preview-link');
@@ -265,14 +276,26 @@ $.uce.widget("fileupload", {
                     $('<p>').append(downloadLink).append(' | ').append(viewLink).append(' | ').append(shareLink).appendTo(li);
                 }
                 else {
-                        if (mime == "image") {
-                            viewLink = $('<a>').attr('href', '#')
-                                               .text('Open in the viewer')
-                                               .bind('click', function() {
-                                                    that._previewImage(file); 
-                                                    that.viewPreview(); 
-                                                    return false; })
-                                               .attr('class', 'ui-fileupload ui-preview-link');
+                        if (mime == "default") {
+                            $('<p>').append(downloadLink).appendTo(li);
+                        }
+                        else {
+                            if (mime == "image")
+                                viewLink = $('<a>').attr('href', '#')
+                                                   .text('Open in the viewer')
+                                                   .bind('click', function() {
+                                                        that._previewImage(file); 
+                                                        that.viewPreview(); 
+                                                        return false; })
+                                                   .attr('class', 'ui-fileupload ui-preview-link');
+                            else if (mime == "video")
+                                viewLink = $('<a>').attr('href', '#')
+                                                   .text('Open in the viewer')
+                                                   .bind('click', function() {
+                                                        that._previewVideo(file); 
+                                                        that.viewPreview(); 
+                                                        return false; })
+                                                   .attr('class', 'ui-fileupload ui-preview-link');
                             shareLink = $('<a>').attr('href', '#')
                                 .text('Share')
                                 .bind('click', function() {
@@ -281,9 +304,6 @@ $.uce.widget("fileupload", {
                                 .attr('class', 'ui-fileupload ui-share-link');
                             $('<p>').append(downloadLink).append(' | ').append(viewLink).append(' | ').append(shareLink).appendTo(li);
                         }
-                    else {
-                        $('<p>').append(downloadLink).appendTo(li);
-                    }
                 }
                 ul = ul.add(li);
             }
@@ -294,6 +314,11 @@ $.uce.widget("fileupload", {
     _preview: function(file) {
         this._setTitle(file.metadata.name);
         var preview = this.element.find('.ui-fileupload-preview');
+        this.element.find('.ui-fileupload-preview-page video').hide();
+        this.element.find('.ui-fileupload-preview-page img').show();
+        this.element.find('.ui-button-previous').show(); 
+        this.element.find('.ui-button-next').show(); 
+        this.element.find('.ui-toolbar-selector').show();
         this.element.find('.ui-selector-current')
             .text(file.currentPage + 1);
         this.element.find('.ui-selector-total')
@@ -308,14 +333,81 @@ $.uce.widget("fileupload", {
     _previewImage: function(file) {
         this._setTitle(file.metadata.name);
         var preview = this.element.find('.ui-fileupload-preview');
+        this.element.find('.ui-fileupload-preview-page img').show();
+        this.element.find('.ui-fileupload-preview-page video').hide();
+        this.element.find('.ui-button-previous').show(); 
+        this.element.find('.ui-button-next').show(); 
+        this.element.find('.ui-toolbar-selector').show();
         this.element.find('.ui-selector-current')
             .text(1);
         this.element.find('.ui-selector-total')
             .text(1);
         var pageImg = this.element.find('.ui-fileupload-preview-page img');
         var src = this.options.ucemeeting
-            .getFileDownloadUrl(file.metadata.id);
+                      .getFileDownloadUrl(file.metadata.id);
         pageImg.attr('src', src);
+    },
+
+    _previewVideo: function(file) {
+        this._setTitle(file.metadata.name);
+        var preview = this.element.find('.ui-fileupload-preview');
+        this.element.find('.ui-fileupload-preview-page img').hide();
+        this.element.find('.ui-button-previous').hide(); 
+        this.element.find('.ui-button-next').hide(); 
+        this.element.find('.ui-toolbar-selector').hide();
+        this.element.find('.ui-selector-current')
+            .text(1);
+        this.element.find('.ui-selector-total')
+            .text(1);
+        var pageVideo = this.element.find('.ui-fileupload-preview-page');
+        pageVideo.html("");
+        var src = this.options.ucemeeting
+                      .getFileAlternativeDownloadUrl(file.metadata.id);
+        var video = $('<video controls autoplay width="100%">').attr('display', 'block');
+                                //.attr('controls', true)
+                                //.attr('autoplay', true)
+                                //.attr('width', "100%")
+                                //.attr('display', 'block');
+        $('<source>').attr('type','video/mp4')
+                     .attr('src',src) 
+                     .appendTo(video);
+        var object = $('<object>').attr('type','application/x-shockwave-flash')
+                                  .attr('data','/lib/file_upload/player.swf')
+                                  .attr('src','/lib/file_upload/player.swf')
+                                  .attr('width','100%')
+                                  .attr('height','300px')
+                                  .html("");
+        //$('<param>').attr('name','movie')
+        //            .attr('value','/lib/file_upload/player.swf')
+        //            .appendTo(object);
+        $('<param>').attr('name','allowfullscreen')
+                    .attr('value','true')
+                    .appendTo(object);
+        $('<param>').attr('name','allowscriptaccess')
+                    .attr('value','always')
+                    .appendTo(object);
+        $('<param>').attr('name','flashvars')
+                    .attr('value',"file="+encodeURI(src))
+                    .appendTo(object);
+        var p = $('<p>').html("");
+        object.appendTo(p);                          
+        video.appendTo(p);
+        /*
+        $('<button>').attr('type', 'button')
+                     .attr('onclick', '$(this).parent().children()[0].play()')
+                     .html("lecture")
+                     .appendTo(p);
+        $('<button>').attr('type', 'button')
+                    .attr('onclick', '$(this).parent().children()[0].pause()')
+                    .html('Pause')
+                    .appendTo(p);
+        $('<button>').attr('type', 'button')
+                    .attr('onclick', '$(this).parent().children()[0].stop()')
+                    .html('Stop')
+                    .appendTo(p);
+        */
+        p.appendTo(pageVideo);
+        //console.log(pageVideo);
     },
 
     _updateNotifications: function() {

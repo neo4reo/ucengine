@@ -39,6 +39,9 @@ init(_) ->
           [{routes,
             {routes, start_link, []},
             permanent, brutal_kill, worker, [routes]},
+           {rewrite,
+            {rewrite, start_link, []},
+            permanent, brutal_kill, worker, [rewrite]},
            {timeout,
             {timeout, start_link, []},
             permanent, brutal_kill, worker, [timeout]}] ++

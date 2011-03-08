@@ -37,7 +37,7 @@ init() ->
                             ["uid", "sid"],
                             [required, required],
                             [string, string]}]},
-     
+
      #uce_route{method='GET',
                 regexp="/file/([^/]+)/([^/]+)",
                 callbacks=[{?MODULE, get,

@@ -96,6 +96,11 @@
           regexp,
           callbacks}).
 
+-record(uce_rewrite, {
+          rule,
+          dest,
+          params}).
+
 -define(TIMEOUT, 5000).
 
 -define(VERSION, config:get(version)).

@@ -78,7 +78,12 @@ extract(Arg, State) ->
     Request = Arg#arg.req,
     case Request#http_request.method of
         'GET' ->
-            {'GET', Arg#arg.pathinfo, parse_query(yaws_api:parse_query(Arg))};
+            {Pathinfo, Parsed_query} = case rewrite:is_rewrite(Arg#arg.pathinfo) of
+                                          false -> {Arg#arg.pathinfo, parse_query(yaws_api:parse_query(Arg))};
+                                          {_, _} = R -> R 
+                                       end,
+            ?DEBUG("PathInfo : ~p~nQueryData : ~p~n", [Arg#arg.pathinfo, Parsed_query]),
+            {'GET', Pathinfo, Parsed_query};
         _ ->
             case Arg#arg.headers#headers.content_type of
                 "multipart/form-data;"++ _Boundary ->

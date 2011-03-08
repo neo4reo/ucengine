@@ -62,6 +62,25 @@ jackTest("handle new image upload", function() {
     equals($('#files_uploaded ul > li:eq(0)').text(), 'norris_pop.jpg ' + date + ' by test_userDownload | Open in the viewer | Share');
 });
 
+jackTest("handle new video upload", function() {
+    var timestamp = new Date().getTime();
+    var date = $.strftime('%m-%d-%y', timestamp);
+    var ucemeeting = jack.create("ucemeeting", ['bind', 'getFileDownloadUrl', 'getFileUploadUrl']);
+
+    jack.expect("ucemeeting.getFileDownloadUrl")
+        .atLeast("1 time")
+        .returnValue('#');
+
+    $('#files_uploaded')
+        .fileupload({ucemeeting: ucemeeting})
+        .fileupload('triggerUceEvent', Factories.createFileEvent({id : 'norris_pop_12.mp4',
+                                                                   name : 'norris_pop.mp4',
+                                                                   mime : 'video/mp4',
+                                                                   datetime : timestamp}));
+    equals($('#files_uploaded ul > li').size(), 1);
+    equals($('#files_uploaded ul > li:eq(0)').text(), 'norris_pop.mp4 ' + date + ' by test_userDownload | Open in the viewer | Share');
+});
+
 jackTest("handle 2 files upload", function() {
     var timestamp = new Date().getTime();
     var date = $.strftime('%m-%d-%y', timestamp);
