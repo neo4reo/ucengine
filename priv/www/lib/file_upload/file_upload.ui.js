@@ -387,7 +387,7 @@ $.uce.widget("fileupload", {
                     .attr('value','always')
                     .appendTo(object);
         $('<param>').attr('name','flashvars')
-                    .attr('value',"file="+encodeURI(src))
+                    .attr('value',"type=video&autostart=true&file="+encodeURI(src))
                     .appendTo(object);
         var p = $('<p>').html("");
         object.appendTo(p);                          
