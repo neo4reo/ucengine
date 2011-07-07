@@ -22,6 +22,7 @@
          add/2,
          all/1,
          get/2,
+         get_all/2,
          delete/2,
          assert/3,
          join/3,
@@ -39,6 +40,7 @@
 -behaviour(gen_server).
 
 -include("uce.hrl").
+-include_lib("stdlib/include/qlc.hrl").
 
 %
 % Add presence
@@ -69,8 +71,15 @@ add(Domain, #uce_presence{id=Sid, user=Uid}=Presence) ->
 get(Domain, Sid) ->
     call_if_proc_found(Domain, Sid, {get_presence, Sid}).
 
-all(_Domain) ->
-    {ok, []}.
+get_all(_Domain, Pid) ->
+    gen_server:call(Pid, get_presences).
+%
+% Return pid of all user connected
+%
+-spec all(domain()) -> {ok, list()}.
+all(Domain) ->
+    Result = qlc:eval(qlc:q([Pid || {{n, l, {D, Type, _Id}}, Pid, _} <- gproc:table({l, n}), D == Domain, Type == uid])),
+    {ok, Result}.
 
 %
 % Delete presence
@@ -130,6 +139,9 @@ handle_call({add_presence, #uce_presence{id=Sid}=Presence}, _From, #state{domain
 
 handle_call({get_presence, Sid}, _From, #state{presences=Presences} = State) ->
     {reply, get_presence_by_sid(Sid, Presences), State};
+
+handle_call(get_presences, _From, #state{presences=Presences} = State) ->
+    {reply, Presences, State};
 
 handle_call({update_presence, #uce_presence{id=Sid}=NewPresence}, _From, #state{presences=Presences} = State) ->
     {ok, Presence} = get_presence_by_sid(Sid, Presences),
