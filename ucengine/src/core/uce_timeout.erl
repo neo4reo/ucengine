@@ -93,8 +93,6 @@ cleanup_presence(_Domain, [], _Now) ->
 diff(L1, L2) ->
     lists:filter(fun(X) -> not lists:member(X, L2) end, L1).
 
--type uid() :: list().
--type meeting() :: list().
 -spec get_all_meetings_of_user(list(#uce_presence{}), uid())
                               -> list(meeting()) | list().
 %
