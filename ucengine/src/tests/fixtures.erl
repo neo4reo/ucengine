@@ -45,10 +45,8 @@ drop_model(Domain, [Model|Models]) ->
     {exports, Funs} = proplists:lookup(exports, Model:module_info()),
     case proplists:lookup(drop, Funs) of
         {drop, 1} ->
-            ?INFO_MSG("~p drop ok", [Model]),
             Model:drop(Domain);
         Ret ->
-            ?INFO_MSG("~p drop ~p", [Model, Ret]),
             ok
     end,
     drop_model(Domain, Models).

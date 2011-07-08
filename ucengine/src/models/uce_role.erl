@@ -164,16 +164,13 @@ internal_get(Domain, Id) ->
     init_table(),
     case cache_get(Domain, Id) of
         undefined ->
-            ?INFO_MSG("no cache~n", []),
             case (db:get(?MODULE, Domain)):get(Domain, Id) of
                 {ok, Role} ->
                     cache_add(Domain, Role),
                     {ok, Role};
                 Error ->
-                    ?ERROR_MSG("internal_get error db ~p", [Error]),
                     Error
             end;
         Role ->
-            ?INFO_MSG("cached~n", []),
             {ok, Role}
     end.
