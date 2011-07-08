@@ -46,7 +46,7 @@ drop_model(Domain, [Model|Models]) ->
     case proplists:lookup(drop, Funs) of
         {drop, 1} ->
             Model:drop(Domain);
-        Ret ->
+        _ ->
             ok
     end,
     drop_model(Domain, Models).
